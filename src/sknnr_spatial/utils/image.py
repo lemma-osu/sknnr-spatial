@@ -3,16 +3,10 @@ from typing import Callable
 
 import numpy as np
 import xarray as xr
-from typing_extensions import Any, Concatenate, ParamSpec, TypeVar
+from typing_extensions import Any, Concatenate
 
-from ..image._base import ImagePreprocessor, ImageType, ImageWrapper
-from ..image.dataarray import DataArrayWrapper
-from ..image.dataset import DatasetWrapper
-from ..image.ndarray import NDArrayWrapper
+from ..types import RT, ImageType, P
 from .wrapper import GenericWrapper
-
-RT = TypeVar("RT")
-P = ParamSpec("P")
 
 
 def is_image_type(X: Any) -> bool:
@@ -40,20 +34,3 @@ def image_or_fallback(
         return func(self, X_image, *args, **kwargs)
 
     return wrapper
-
-
-def get_image_wrapper(X_image: ImageType) -> type[ImageWrapper]:
-    """Get an ImageWrapper subclass for a given image."""
-    if isinstance(X_image, np.ndarray):
-        return NDArrayWrapper
-    if isinstance(X_image, xr.DataArray):
-        return DataArrayWrapper
-    if isinstance(X_image, xr.Dataset):
-        return DatasetWrapper
-
-    raise TypeError(f"Unsupported image type: {type(X_image).__name__}")
-
-
-def get_image_preprocessor(X_image: ImageType) -> type[ImagePreprocessor]:
-    """Get an ImagePreprocessor subclass for a given image."""
-    return get_image_wrapper(X_image).preprocessor_cls
